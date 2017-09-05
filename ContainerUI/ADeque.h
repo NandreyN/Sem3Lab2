@@ -52,10 +52,15 @@ public:
 
 	template<class U>
 	friend istream& operator >> (istream& i, ADeque<U>&); // OK
+
+	string getInternalInfo() const;
+
 	bool operator==(const ADeque&);
 
 	iterator begin() const;//OK
 	iterator end() const;//OK
+
+	string toString();
 
 	void push_back(const DataType&); // OK
 	void push_front(const DataType&); // OK
@@ -64,14 +69,14 @@ public:
 	void swap(ADeque<DataType>&); // OK
 
 
-	// EMPLACE
+								  // EMPLACE
 
 	void clear();//OK
 	size_t size() const; // ok
 	bool isEmpty() const; // ok
 private:
-	bool checkSingleSpaceBack(int);
-	bool checkSingleSpaceFront(int);
+	bool enoughSingleSpaceBack(int);
+	bool enoughSingleSpaceFront(int);
 	size_t getSpaceFront();
 	size_t getSpaceBack();
 
@@ -201,6 +206,17 @@ istream& operator >> (istream& i, ADeque<T>& ad)
 }
 
 template <class DataType>
+string ADeque<DataType>::getInternalInfo() const
+{
+	string info = "";
+	info = "Space reserved : " + to_string(_sz) + "\r\n" +
+		"Head idx : " + to_string(_headIdx) + "\r\n" +
+		"Tail idx : " + to_string(_tailIdx) + "\r\n" +
+		"Current size : " + to_string(size()) + "\r\n";
+	return info;
+}
+
+template <class DataType>
 bool ADeque<DataType>::operator==(const ADeque& ad)
 {
 	if (_sz != ad.size()) return false;
@@ -223,9 +239,19 @@ typename ADeque<DataType>::iterator ADeque<DataType>::end() const
 }
 
 template <class DataType>
+string ADeque<DataType>::toString()
+{
+	if (isEmpty()) return "";
+	ostringstream oss;
+	for (size_t i = _headIdx; i <= _tailIdx; i++)
+		oss << _deqData[i] << " ";
+	return "-->" + oss.str() + "<--";
+}
+
+template <class DataType>
 void ADeque<DataType>::push_back(const DataType& val)
 {
-	if (!checkSingleSpaceBack(1))
+	if (!enoughSingleSpaceBack(1))
 		enlarge();
 
 	_tailIdx++;
@@ -235,7 +261,7 @@ void ADeque<DataType>::push_back(const DataType& val)
 template <class DataType>
 void ADeque<DataType>::push_front(const DataType& val)
 {
-	if (!checkSingleSpaceFront(1))
+	if (!enoughSingleSpaceFront(1))
 		enlarge();
 
 	_headIdx--;
@@ -245,7 +271,8 @@ void ADeque<DataType>::push_front(const DataType& val)
 template <class DataType>
 DataType ADeque<DataType>::pop_front()
 {
-	if (isEmpty()) throw std::out_of_range("pop_front out of range");
+	if (isEmpty()) 
+		throw std::out_of_range("pop_front out of range");
 	auto it = begin();
 	_headIdx++;
 	return *it;
@@ -254,7 +281,8 @@ DataType ADeque<DataType>::pop_front()
 template <class DataType>
 DataType ADeque<DataType>::pop_back()
 {
-	if (isEmpty()) throw std::out_of_range("pop_back out of range");
+	if (isEmpty()) 
+		throw std::out_of_range("pop_back out of range");
 	auto it = end();
 	if (_tailIdx == 0) clear();
 	_tailIdx--;
@@ -273,30 +301,30 @@ void ADeque<DataType>::swap(ADeque<DataType>& other)
 template <DataType, class ... Args>
 void ADeque<DataType>::emplace(typename BDeque<DataType>::const_iterator it, Args&&... a)
 {
-	size_t insertElemCnt = sizeof...(a);
-	vector<DataType> v;
+size_t insertElemCnt = sizeof...(a);
+vector<DataType> v;
 
-	auto bgn = begin();
-	size_t i = 0;
-	while (bgn != it)
-	{
-		v.push_back(*it);
-		++bgn;
-		i++;
-	}
+auto bgn = begin();
+size_t i = 0;
+while (bgn != it)
+{
+v.push_back(*it);
+++bgn;
+i++;
+}
 
-	v.push_back(a...);
+v.push_back(a...);
 
-	while (it != end())
-	{
-		v.push_back(*it);
-		++it;
-		i++;
-	}
+while (it != end())
+{
+v.push_back(*it);
+++it;
+i++;
+}
 
-	if (getSpaceBack() + getSpaceFront() < insertElemCnt) enlarge();
+if (getSpaceBack() + getSpaceFront() < insertElemCnt) enlarge();
 
-	copy(v.begin(), v.end(), _deqData);
+copy(v.begin(), v.end(), _deqData);
 }*/
 
 template <class DataType>
@@ -324,15 +352,15 @@ bool ADeque<DataType>::isEmpty() const
 }
 
 template <class DataType>
-bool ADeque<DataType>::checkSingleSpaceBack(int x)
+bool ADeque<DataType>::enoughSingleSpaceBack(int x)
 {
-	return (_tailIdx + x < _sz) ? true : false;
+	return (int(_tailIdx) + x < _sz) ? true : false;
 }
 
 template <class DataType>
-bool ADeque<DataType>::checkSingleSpaceFront(int x)
+bool ADeque<DataType>::enoughSingleSpaceFront(int x)
 {
-	return (_headIdx - x >= 0) ? true : false;
+	return (int(_headIdx) - x >= 0) ? true : false;
 }
 
 template <class DataType>
@@ -351,13 +379,19 @@ template <class DataType>
 void ADeque<DataType>::enlarge()
 {
 	size_t newSize = _sz * 3;
+	if (newSize == 0)
+		newSize = initialSize;
 	vector<DataType> d;
+	
+	if (_sz != 0)
+	{
+		size_t i = _headIdx;
+		for (; i <= _tailIdx; i++)
+			d.push_back(_deqData[i]);
+	}
 
-	size_t i = _headIdx;
-	for (; i <= _tailIdx; i++)
-		d.push_back(_deqData[i]);
-
-	delete[] _deqData;
+	if (_deqData != nullptr)
+		delete[] _deqData;
 	_sz = newSize;
 	_deqData = new DataType[_sz];
 
@@ -368,5 +402,5 @@ void ADeque<DataType>::enlarge()
 
 	for (auto elem : d)
 		push_back(elem);
-	cout << "Enlarged!" << endl;
+	//cout << "Enlarged!" << endl;
 }
