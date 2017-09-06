@@ -3,6 +3,7 @@
 #include <sstream>
 #include <algorithm>
 #include <assert.h>
+#include <queue>
 
 const size_t initialSize = 6;
 
@@ -46,6 +47,9 @@ public:
 
 	ADeque& operator=(ADeque&&);//OK
 	ADeque& operator=(const ADeque&);//OK
+	ADeque& operator+=(const ADeque&);
+
+	friend ADeque operator+(const ADeque&, const ADeque&);
 
 	template<class U>
 	friend ostream& operator<<(ostream& o, const ADeque<U>&); // OK
@@ -55,21 +59,25 @@ public:
 
 	string getInternalInfo() const;
 
-	bool operator==(const ADeque&);
+	bool operator==(const ADeque&) const;
 
-	iterator begin() const;//OK
-	iterator end() const;//OK
+	iterator begin() ;//OK
+	iterator end() ;//OK
 
-	string toString();
+	string toString() const;
 
 	void push_back(const DataType&); // OK
 	void push_front(const DataType&); // OK
 	DataType pop_front(); // OK
 	DataType pop_back(); // OK
+	DataType front() const;
+	DataType back() const;
+
 	void swap(ADeque<DataType>&); // OK
-
-
-								  // EMPLACE
+	
+	// emplace
+	template<class ... Args>
+	void emplace(iterator position, Args&& ... args);
 
 	void clear();//OK
 	size_t size() const; // ok
@@ -160,11 +168,11 @@ ADeque<DataType>& ADeque<DataType>::operator=(ADeque&& ad)
 			_sz = ad._sz;
 		}
 
-		for (size_t i = 0; i < ad.size(); i++)
-			_deqData[i] = ad._deqData[i];
-
 		_headIdx = ad._headIdx;
 		_tailIdx = ad._tailIdx;
+
+		for (size_t i = _headIdx; i <= _tailIdx; i++)
+			_deqData[i] = ad._deqData[i];
 
 		delete[] ad._deqData;
 		ad._deqData = nullptr;
@@ -184,6 +192,14 @@ ADeque<DataType>& ADeque<DataType>::operator=(const ADeque& ad)
 	_tailIdx = ad._tailIdx;
 	copy(ad._deqData, ad._deqData + _sz, _deqData);
 
+	return *this;
+}
+
+template <class DataType>
+ADeque<DataType>& ADeque<DataType>::operator+=(const ADeque& ad)
+{
+	for (auto it = ad.begin(); it != ad.end(); ++it)
+		push_back(*it);
 	return *this;
 }
 
@@ -208,8 +224,8 @@ istream& operator >> (istream& i, ADeque<T>& ad)
 template <class DataType>
 string ADeque<DataType>::getInternalInfo() const
 {
-	string info = "";
-	info = "Space reserved : " + to_string(_sz) + "\r\n" +
+	string info =
+		"Space reserved : " + to_string(_sz) + "\r\n" +
 		"Head idx : " + to_string(_headIdx) + "\r\n" +
 		"Tail idx : " + to_string(_tailIdx) + "\r\n" +
 		"Current size : " + to_string(size()) + "\r\n";
@@ -217,7 +233,7 @@ string ADeque<DataType>::getInternalInfo() const
 }
 
 template <class DataType>
-bool ADeque<DataType>::operator==(const ADeque& ad)
+bool ADeque<DataType>::operator==(const ADeque& ad) const
 {
 	if (_sz != ad.size()) return false;
 
@@ -227,23 +243,23 @@ bool ADeque<DataType>::operator==(const ADeque& ad)
 }
 
 template <class DataType>
-typename ADeque<DataType>::iterator ADeque<DataType>::begin() const
+typename ADeque<DataType>::iterator ADeque<DataType>::begin() 
 {
 	return iterator(_deqData + _headIdx);
 }
 
 template <class DataType>
-typename ADeque<DataType>::iterator ADeque<DataType>::end() const
+typename ADeque<DataType>::iterator ADeque<DataType>::end()
 {
 	return iterator(_deqData + _tailIdx);
 }
 
 template <class DataType>
-string ADeque<DataType>::toString()
+string ADeque<DataType>::toString() const
 {
 	if (isEmpty()) return "";
 	ostringstream oss;
-	for (size_t i = _headIdx; i <= _tailIdx; i++)
+	for (auto i = _headIdx; i <= _tailIdx;i++)
 		oss << _deqData[i] << " ";
 	return "-->" + oss.str() + "<--";
 }
@@ -271,7 +287,7 @@ void ADeque<DataType>::push_front(const DataType& val)
 template <class DataType>
 DataType ADeque<DataType>::pop_front()
 {
-	if (isEmpty()) 
+	if (isEmpty())
 		throw std::out_of_range("pop_front out of range");
 	auto it = begin();
 	_headIdx++;
@@ -281,7 +297,7 @@ DataType ADeque<DataType>::pop_front()
 template <class DataType>
 DataType ADeque<DataType>::pop_back()
 {
-	if (isEmpty()) 
+	if (isEmpty())
 		throw std::out_of_range("pop_back out of range");
 	auto it = end();
 	if (_tailIdx == 0) clear();
@@ -290,42 +306,52 @@ DataType ADeque<DataType>::pop_back()
 }
 
 template <class DataType>
+DataType ADeque<DataType>::front() const
+{
+	return *begin();
+}
+
+template <class DataType>
+DataType ADeque<DataType>::back() const
+{
+	return *end();
+}
+
+template <class DataType>
 void ADeque<DataType>::swap(ADeque<DataType>& other)
 {
-	ADeque<DataType> tmp = move(other);
-	other = move(*this)
-		*this = move(tmp);
+	ADeque<DataType> tmp;
+	tmp = move(other);
+	other = move(*this);
+	*this = move(tmp);
 }
 
-/*template <class DataType>
-template <DataType, class ... Args>
-void ADeque<DataType>::emplace(typename BDeque<DataType>::const_iterator it, Args&&... a)
+template <class DataType>
+template <class ... Args>
+void ADeque<DataType>::emplace(iterator position, Args&&... args)
 {
-size_t insertElemCnt = sizeof...(a);
-vector<DataType> v;
+	queue<DataType> tail, params;
+	// "Tail was copyed"
+	while (position != end)
+	{
+		tail.push(*position);
+		++position;
+	}
 
-auto bgn = begin();
-size_t i = 0;
-while (bgn != it)
-{
-v.push_back(*it);
-++bgn;
-i++;
+	int a[] = { ((void)(params.push(args)), 1) ... };
+	int totalSize = params.size() + tail.size();
+
+	while (!enoughSingleSpaceBack(totalSize) && !enoughSingleSpaceFront(totalSize))
+		enlarge();
+
+	while (!params.empty())
+		push_back(params.pop());
+
+	while (!tail.empty())
+		push_back(tail.pop());
+
 }
 
-v.push_back(a...);
-
-while (it != end())
-{
-v.push_back(*it);
-++it;
-i++;
-}
-
-if (getSpaceBack() + getSpaceFront() < insertElemCnt) enlarge();
-
-copy(v.begin(), v.end(), _deqData);
-}*/
 
 template <class DataType>
 void ADeque<DataType>::clear()
@@ -382,12 +408,11 @@ void ADeque<DataType>::enlarge()
 	if (newSize == 0)
 		newSize = initialSize;
 	vector<DataType> d;
-	
+
 	if (_sz != 0)
 	{
-		size_t i = _headIdx;
-		for (; i <= _tailIdx; i++)
-			d.push_back(_deqData[i]);
+		for(auto it = begin(); it != end(); ++it)
+			d.push_back(*it);
 	}
 
 	if (_deqData != nullptr)
@@ -403,4 +428,12 @@ void ADeque<DataType>::enlarge()
 	for (auto elem : d)
 		push_back(elem);
 	//cout << "Enlarged!" << endl;
+}
+
+template<class U>
+ADeque<U> operator+(const ADeque<U>& lhs, const ADeque<U>& rhs)
+{
+	ADeque<U> sum(lhs);
+	sum += rhs;
+	return sum;
 }

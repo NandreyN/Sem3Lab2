@@ -18,6 +18,8 @@
 #define IDC_INPUTPUSHBACK 1002
 #define IDC_INPUTPUSHFRONT 1003
 #define IDC_INPUTINIT 1010
+#define IDC_TEXT 1013
+#define IDC_SWAPBUTTON 1014
 
 
 using namespace std;
@@ -83,6 +85,7 @@ BOOL CALLBACK CContainerProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM l
 {
 	char buffer[1024];
 	static ADeque<int> deque;
+	static ADeque<int> anotherDeque;
 
 	static HWND inputInit;
 	static HWND inputInitButton;
@@ -91,12 +94,16 @@ BOOL CALLBACK CContainerProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM l
 	static HWND cContent;
 	static HWND output;
 	static HWND clearButton;
+	static HWND text;
+	static HWND swapButton;
 
 	static const string initString = "1 2 3 4 5";
 	static const string inputPushBackString = "Data to push back:";
 	static const string inputPushFrontString = "Data to push front:";
 	static const string cContentString = "Contatiner data: ";
 	static const string outputString = "Output: ";
+	static string anotherQString = "D: 6 7 8";
+
 	switch (message)
 	{
 	case WM_INITDIALOG:
@@ -107,12 +114,16 @@ BOOL CALLBACK CContainerProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM l
 		output = GetDlgItem(hwndDlg, IDC_OUPUT);
 		inputInitButton = GetDlgItem(hwndDlg, IDC_INITBUTTON);
 		clearButton = GetDlgItem(hwndDlg, IDC_CLEARBUTTON);
+		text = GetDlgItem(hwndDlg, IDC_TEXT);
 
 		SendMessageA(output, EM_REPLACESEL, 0, (LPARAM)(outputString.data()));
 		SendMessageA(inputInit, EM_REPLACESEL, 0, (LPARAM)(initString.data()));
 		SendMessageA(inputPushBack, EM_REPLACESEL, 0, (LPARAM)(inputPushBackString.data()));
 		SendMessageA(inputPushFront, EM_REPLACESEL, 0, (LPARAM)(inputPushFrontString.data()));
 		SendMessageA(cContent, EM_REPLACESEL, 0, (LPARAM)(cContentString.data()));
+		SetWindowText(text,anotherQString.data());
+
+		anotherDeque = ADeque<int>({6,7,8});
 		break;
 	case WM_COMMAND:
 		if (HIWORD(wParam) == EN_SETFOCUS && LOWORD(wParam) == IDC_INPUTINIT)
@@ -215,13 +226,18 @@ BOOL CALLBACK CContainerProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM l
 			updateDequeStateMessage(output, deque);
 			break;
 		}
+
+		case IDC_SWAPBUTTON:
+		{
+			deque.swap(anotherDeque);
+			updateDequeStateMessage(output, deque);
+			SetWindowText(cContent, deque.toString().data());
+			SetWindowText(text, anotherDeque.toString().data());
+			break;
+		}
 		case IDOK:
 			SendMessage(GetParent(hwndDlg), WM_CLOSE, 0, 0);
 			EndDialog(hwndDlg, 0);
-			break;
-		case IDCANCEL:
-			EndDialog(hwndDlg, 0);
-			SendMessage(GetParent(hwndDlg), WM_CLOSE, 0, 0);
 			break;
 		}
 		break;
