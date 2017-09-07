@@ -26,6 +26,9 @@
     <ClInclude Include="ADeque.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="LDeque.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ContainerUI.rc">

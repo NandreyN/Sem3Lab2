@@ -1,7 +1,8 @@
 
 #undef UNICODE
 #include <windows.h>
-#include "ADeque.h"
+//#include "LDeque.h"
+#include "LDeque.h"
 #include  <math.h>
 #include <vector>
 #define IDD_DIALOG1 101
@@ -23,8 +24,7 @@
 
 
 using namespace std;
-
-void updateDequeStateMessage(HWND&, ADeque<int>&);
+void updateDequeStateMessage(HWND&, LDeque<int>&);
 BOOL InitWnd1(HINSTANCE hinstance);
 BOOL InitInstance1(HINSTANCE hinstance, int nCmdShow);
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam);
@@ -84,8 +84,8 @@ BOOL InitWnd1(HINSTANCE hinstance)
 BOOL CALLBACK CContainerProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	char buffer[1024];
-	static ADeque<int> deque;
-	static ADeque<int> anotherDeque;
+	static LDeque<int> deque;
+	static LDeque<int> anotherDeque;
 
 	static HWND inputInit;
 	static HWND inputInitButton;
@@ -123,7 +123,7 @@ BOOL CALLBACK CContainerProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM l
 		SendMessageA(cContent, EM_REPLACESEL, 0, (LPARAM)(cContentString.data()));
 		SetWindowText(text,anotherQString.data());
 
-		anotherDeque = ADeque<int>({6,7,8});
+		anotherDeque = LDeque<int>({6,7,8});
 		break;
 	case WM_COMMAND:
 		if (HIWORD(wParam) == EN_SETFOCUS && LOWORD(wParam) == IDC_INPUTINIT)
@@ -149,7 +149,7 @@ BOOL CALLBACK CContainerProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM l
 			string s(buffer);
 			if (!isNormal(s)) break;
 
-			deque = ADeque<int>(s);
+			deque = LDeque<int>(s);
 			SetWindowText(inputInit, 0);
 			EnableWindow(inputInit, false);
 			EnableWindow(inputInitButton, false);
@@ -216,6 +216,7 @@ BOOL CALLBACK CContainerProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM l
 				SetWindowText(output, ex.what());
 			}
 			SetWindowText(cContent, deque.toString().data());
+			updateDequeStateMessage(output, deque);
 			break;
 		}
 
@@ -314,7 +315,7 @@ vector<int> parseString(const string& s)
 	}
 	return vect;
 }
-void updateDequeStateMessage(HWND& hwnd, ADeque<int>& d)
+void updateDequeStateMessage(HWND& hwnd, LDeque<int>& d)
 {
 	SetWindowText(hwnd, d.getInternalInfo().data());
 }

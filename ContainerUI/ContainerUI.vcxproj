@@ -148,6 +148,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ADeque.h" />
+    <ClInclude Include="LDeque.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
