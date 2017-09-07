@@ -3,6 +3,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <queue>
 using namespace std;
 
 
@@ -28,8 +29,17 @@ class LDeque
 		Node* prev;
 	};
 
+	class const_iterator;
+
+	class NodeGetter
+	{
+	public:
+		static Node* getNode(const_iterator& ci) { return ci.nd; };
+	};
+
 	class const_iterator
 	{
+		Node* nd;
 		typedef const_iterator  self_type;
 		typedef Type value;
 		typedef const Type& const_reference;
@@ -47,8 +57,7 @@ class LDeque
 		pointer operator->() { return &nd->value; }
 		bool operator==(const self_type& rhs) { return nd == rhs.nd; };
 		bool operator!=(const self_type& rhs) { return nd != rhs.nd; }
-	private:
-		Node* nd;
+		friend Node* NodeGetter::getNode(const_iterator&);
 	};
 
 public:
@@ -96,6 +105,7 @@ public:
 	size_t size() const; // ok
 	bool isEmpty() const; // ok
 private:
+	NodeGetter ng;
 	Node* _head;
 	Node* _tail;
 	int  _length;
@@ -344,6 +354,42 @@ void LDeque<Type>::swap(LDeque<Type>& other)
 	*this = move(tmp);
 }
 
+template <class Type>
+template <class ... Args>
+typename LDeque<Type>::const_iterator LDeque<Type>::emplace(const_iterator position, Args&&... args)
+{
+	int sz = sizeof...(args);
+	Type arguments[] = { static_cast<Type>(args)... };
+
+	Node* cpy = _head;
+	Node* got = NodeGetter::getNode(position);
+	if (got == _tail)
+	{
+		for (auto i = 0; i < sz; i++) push_back(arguments[i]);
+		return ++got;
+	}
+
+	while (cpy != _tail && cpy != got)
+		cpy = cpy->next;
+
+
+	Node* targetNode = NodeGetter::getNode(position);
+	Node* toReturn = NodeGetter::getNode(position);
+	Node* concatNodeRight = targetNode->next;
+
+	for (auto i = 0; i < sz; i++)
+	{
+		Node* n = new Node(arguments[i]);
+		n->prev = targetNode;
+
+		targetNode->next = n;
+		targetNode = targetNode->next;
+	}
+	targetNode->next = concatNodeRight;
+	concatNodeRight->prev = targetNode;
+
+	return const_iterator(_head);
+}
 
 template <class Type>
 void LDeque<Type>::clear()
