@@ -148,8 +148,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ADeque.h" />
+    <ClInclude Include="Base_Deque.h" />
+    <ClInclude Include="Base_Visitor.h" />
     <ClInclude Include="LDeque.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="Sum_Visitor.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ContainerUI.rc" />

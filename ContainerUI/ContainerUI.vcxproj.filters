@@ -29,6 +29,15 @@
     <ClInclude Include="LDeque.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Base_Visitor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Base_Deque.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sum_Visitor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ContainerUI.rc">

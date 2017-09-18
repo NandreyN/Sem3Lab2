@@ -4,11 +4,13 @@
 #include <sstream>
 #include <vector>
 #include <queue>
+#include "Base_Deque.h"
+
 using namespace std;
 
 
 template<class Type>
-class LDeque
+class LDeque: public Base_Deque<Type>
 {
 	struct Node
 	{
@@ -89,6 +91,7 @@ public:
 	const_iterator  end() const; // ok
 	string toString() const; // ok
 
+
 	void push_back(const Type&); // ok
 	void push_front(const Type&); // ok
 	Type pop_front();//ok
@@ -104,6 +107,8 @@ public:
 	void clear();//ok
 	size_t size() const; // ok
 	bool isEmpty() const; // ok
+
+	void accept(Base_Visitor<Type>&) override;
 private:
 	NodeGetter ng;
 	Node* _head;
@@ -421,6 +426,12 @@ template <class Type>
 bool LDeque<Type>::isEmpty() const
 {
 	return size() == 0 ? true : false;
+}
+
+template <class Type>
+void LDeque<Type>::accept(Base_Visitor<Type>& vis)
+{
+	vis.visit(*this);
 }
 
 template<class U>

@@ -4,13 +4,14 @@
 #include <algorithm>
 #include <assert.h>
 #include <queue>
+#include "Base_Deque.h"
 
 const size_t initialSize = 6;
 
 using namespace std;
 
 template<class DataType>
-class ADeque
+class ADeque : public Base_Deque<DataType>
 {
 public:
 
@@ -60,6 +61,7 @@ public:
 	string getInternalInfo() const;
 
 	bool operator==(const ADeque&) const;
+	DataType operator[](int idx)const ;
 
 	iterator begin() ;//OK
 	iterator end() ;//OK
@@ -82,6 +84,8 @@ public:
 	void clear();//OK
 	size_t size() const; // ok
 	bool isEmpty() const; // ok
+
+	void accept(Base_Visitor<DataType>&) override;
 private:
 	bool enoughSingleSpaceBack(int);
 	bool enoughSingleSpaceFront(int);
@@ -243,6 +247,12 @@ bool ADeque<DataType>::operator==(const ADeque& ad) const
 }
 
 template <class DataType>
+DataType ADeque<DataType>::operator[](int idx) const
+{
+	return _deqData[_headIdx + idx];
+}
+
+template <class DataType>
 typename ADeque<DataType>::iterator ADeque<DataType>::begin() 
 {
 	return iterator(_deqData + _headIdx);
@@ -375,6 +385,12 @@ template <class DataType>
 bool ADeque<DataType>::isEmpty() const
 {
 	return size() == 0 ? true : false;
+}
+
+template <class DataType>
+void ADeque<DataType>::accept(Base_Visitor<DataType>& visitor)
+{
+	visitor.visit(*this);
 }
 
 template <class DataType>

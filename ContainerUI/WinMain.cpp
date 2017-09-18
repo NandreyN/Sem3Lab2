@@ -1,7 +1,7 @@
 
 #undef UNICODE
 #include <windows.h>
-//#include "LDeque.h"
+#include "Sum_Visitor.h"
 #include "LDeque.h"
 #include  <math.h>
 #include <vector>
@@ -21,9 +21,15 @@
 #define IDC_INPUTINIT 1010
 #define IDC_TEXT 1013
 #define IDC_SWAPBUTTON 1014
+#define IDC_VISITORSUM 1015
+#define IDC_VISITORTEXT 1016
 
 
 using namespace std;
+
+template<class T>
+string initListToString(const std::initializer_list<T>&);
+
 void updateDequeStateMessage(HWND&, LDeque<int>&);
 BOOL InitWnd1(HINSTANCE hinstance);
 BOOL InitInstance1(HINSTANCE hinstance, int nCmdShow);
@@ -95,6 +101,7 @@ BOOL CALLBACK CContainerProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM l
 	static HWND clearButton;
 	static HWND text;
 	static HWND swapButton;
+	static HWND visitorTextInit;
 
 	static const string initString = "1 2 3 4 5";
 	static const string inputPushBackString = "Data to push back:";
@@ -102,6 +109,8 @@ BOOL CALLBACK CContainerProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM l
 	static const string cContentString = "Contatiner data: ";
 	static const string outputString = "Output: ";
 	static string anotherQString = "D: 6 7 8";
+	static string visitor_text_string = "";
+	static string messageBoxText = "";
 
 	switch (message)
 	{
@@ -114,15 +123,17 @@ BOOL CALLBACK CContainerProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM l
 		inputInitButton = GetDlgItem(hwndDlg, IDC_INITBUTTON);
 		clearButton = GetDlgItem(hwndDlg, IDC_CLEARBUTTON);
 		text = GetDlgItem(hwndDlg, IDC_TEXT);
+		visitorTextInit = GetDlgItem(hwndDlg, IDC_VISITORTEXT);
 
 		SendMessageA(output, EM_REPLACESEL, 0, (LPARAM)(outputString.data()));
 		SendMessageA(inputInit, EM_REPLACESEL, 0, (LPARAM)(initString.data()));
 		SendMessageA(inputPushBack, EM_REPLACESEL, 0, (LPARAM)(inputPushBackString.data()));
 		SendMessageA(inputPushFront, EM_REPLACESEL, 0, (LPARAM)(inputPushFrontString.data()));
 		SendMessageA(cContent, EM_REPLACESEL, 0, (LPARAM)(cContentString.data()));
-		SetWindowText(text,anotherQString.data());
+		SetWindowText(text, anotherQString.data());
+		SetWindowText(visitorTextInit, "");
 
-		anotherDeque = LDeque<int>({6,7,8});
+		anotherDeque = LDeque<int>({ 6,7,8 });
 		break;
 	case WM_COMMAND:
 		if (HIWORD(wParam) == EN_SETFOCUS && LOWORD(wParam) == IDC_INPUTINIT)
@@ -144,7 +155,7 @@ BOOL CALLBACK CContainerProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM l
 		{
 		case IDC_INITBUTTON:
 		{
-			GetWindowText(inputInit,buffer,1024);
+			GetWindowText(inputInit, buffer, 1024);
 			string s(buffer);
 			if (!isNormal(s)) break;
 
@@ -154,7 +165,7 @@ BOOL CALLBACK CContainerProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM l
 			EnableWindow(inputInitButton, false);
 
 			SetWindowText(cContent, deque.toString().data());
-			updateDequeStateMessage(output,deque);
+			updateDequeStateMessage(output, deque);
 			break;
 		}
 		case IDC_PUSHF:
@@ -195,7 +206,7 @@ BOOL CALLBACK CContainerProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM l
 			{
 				deque.pop_back();
 			}
-			catch(std::out_of_range ex)
+			catch (std::out_of_range ex)
 			{
 				SetWindowText(output, ex.what());
 			}
@@ -239,8 +250,33 @@ BOOL CALLBACK CContainerProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM l
 			SendMessage(GetParent(hwndDlg), WM_CLOSE, 0, 0);
 			EndDialog(hwndDlg, 0);
 			break;
+
+		case IDC_VISITORSUM:
+		{
+			std::initializer_list<int> ld_init = { 1,2,2,0,7,8,3 };
+			std::initializer_list<int> ad_init = { 10,10,12,11 };
+
+			Sum_Visitor<int> v;
+			LDeque<int> ld(ld_init);
+			ADeque<int> ad(ad_init);
+
+			visitor_text_string = "LDeque init:" + initListToString(ld_init) + " \r\nADeque init:" + initListToString(ad_init) +"\r\n";
+			SetWindowText(visitorTextInit, visitor_text_string.data());
+
+			ld.accept(v);
+			int l = v.getSum();
+			ad.accept(v);
+			int a = v.getSum();
+
+			messageBoxText = "for LDeque : " + to_string(l) + "\r\n" + "for ADeque" + to_string(a) + "\r\n";
+			MessageBox(hwndDlg, messageBoxText.data(), 0, MB_OK);
+			break;
 		}
+		}
+
 		break;
+
+
 	}
 	return FALSE;
 }
@@ -306,7 +342,7 @@ vector<int> parseString(const string& s)
 {
 	vector<int> vect;
 	istringstream oss(s);
-	while(!oss.eof())
+	while (!oss.eof())
 	{
 		int elem;
 		oss >> elem;
@@ -317,4 +353,13 @@ vector<int> parseString(const string& s)
 void updateDequeStateMessage(HWND& hwnd, LDeque<int>& d)
 {
 	SetWindowText(hwnd, d.getInternalInfo().data());
+}
+
+template<class T>
+string initListToString(const std::initializer_list<T>& lst)
+{
+	ostringstream oss("");
+	for (const auto& elem : lst)
+		oss << elem << " ";
+	return oss.str();
 }
