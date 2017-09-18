@@ -86,7 +86,6 @@ BOOL CALLBACK CContainerProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM l
 	char buffer[1024];
 	static LDeque<int> deque;
 	static LDeque<int> anotherDeque;
-
 	static HWND inputInit;
 	static HWND inputInitButton;
 	static HWND inputPushBack;
