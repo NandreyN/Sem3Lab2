@@ -197,7 +197,8 @@ LDeque<Type>& LDeque<Type>::operator=(LDeque&& ld)
 template <class Type>
 LDeque<Type>& LDeque<Type>::operator=(const LDeque& ld)
 {
-	*this = LDeque(ld);
+	if (*this != ld)
+		*this = LDeque(ld);
 	return *this;
 }
 
@@ -392,7 +393,7 @@ typename LDeque<Type>::const_iterator LDeque<Type>::emplace(const_iterator posit
 	targetNode->next = concatNodeRight;
 	concatNodeRight->prev = targetNode;
 
-	return const_iterator(_head);
+	return const_iterator(toReturn->next);
 }
 
 template <class Type>
