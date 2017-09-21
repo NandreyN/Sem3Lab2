@@ -51,6 +51,7 @@ class LDeque: public Base_Deque<Type>
 	public:
 		// Constructor init list:
 		const_iterator(Node* p) : nd(p) {}
+		const_iterator(const const_iterator& it):nd(it.nd){}
 		// opeartors overload 
 		self_type operator++() { self_type src = *this; nd = nd->next; return src; };
 		self_type operator++(int) { nd = nd->next; return *this; };

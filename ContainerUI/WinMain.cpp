@@ -23,6 +23,7 @@
 #define IDC_SWAPBUTTON 1014
 #define IDC_VISITORSUM 1015
 #define IDC_VISITORTEXT 1016
+#include <iterator>
 
 
 using namespace std;
@@ -253,14 +254,14 @@ BOOL CALLBACK CContainerProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM l
 
 		case IDC_VISITORSUM:
 		{
-			std::initializer_list<int> ld_init = { 1,2,2,0,7,8,3 };
+			std::initializer_list<int> ld_init = { 1,2,2,0,7,8,3,5 };
 			std::initializer_list<int> ad_init = { 10,10,12,11 };
 
 			Sum_Visitor<int> v;
 			LDeque<int> ld(ld_init);
 			ADeque<int> ad(ad_init);
 
-			visitor_text_string = "LDeque init:" + initListToString(ld_init) + " \r\nADeque init:" + initListToString(ad_init) +"\r\n";
+			visitor_text_string = "LDeque init: " + initListToString(ld_init) + " \r\nADeque init: " + initListToString(ad_init) + "\r\n";
 			SetWindowText(visitorTextInit, visitor_text_string.data());
 
 			ld.accept(v);
@@ -268,8 +269,11 @@ BOOL CALLBACK CContainerProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM l
 			ad.accept(v);
 			int a = v.getSum();
 
-			messageBoxText = "for LDeque : " + to_string(l) + "\r\n" + "for ADeque" + to_string(a) + "\r\n";
-			MessageBox(hwndDlg, messageBoxText.data(), 0, MB_OK);
+			messageBoxText = "for LDeque : " + to_string(l) + "\r\n" + "for ADeque : " + to_string(a) + "\r\n";
+			MessageBox(hwndDlg, messageBoxText.data(), "Sum_Visitor", MB_OK);
+
+			vector<int> vect;
+			copy(ld.begin(), ld.end(), back_inserter(vect));
 			break;
 		}
 		}
