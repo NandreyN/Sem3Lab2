@@ -30,8 +30,6 @@ class LDeque : public Base_Deque<Type>
 		Node* prev;
 	};
 
-	class DequeInputIterator;
-
 	class DequeConstIterator : public std::iterator<std::random_access_iterator_tag, Node*>
 	{
 		Node * nd;
@@ -47,7 +45,6 @@ class LDeque : public Base_Deque<Type>
 		DequeConstIterator& operator++() { DequeConstIterator cpy = *this; nd = nd->next; return cpy; }
 		DequeConstIterator& operator++(int) { nd = nd->next; return *this; }
 
-		operator DequeInputIterator () { return DequeInputIterator(nd); };
 	};
 
 public:
