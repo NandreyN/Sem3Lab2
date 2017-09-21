@@ -272,8 +272,6 @@ BOOL CALLBACK CContainerProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM l
 			messageBoxText = "for LDeque : " + to_string(l) + "\r\n" + "for ADeque : " + to_string(a) + "\r\n";
 			MessageBox(hwndDlg, messageBoxText.data(), "Sum_Visitor", MB_OK);
 
-			vector<int> vect;
-			copy(ld.begin(), ld.end(), back_inserter(vect));
 			break;
 		}
 		}

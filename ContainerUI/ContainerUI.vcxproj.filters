@@ -38,6 +38,9 @@
     <ClInclude Include="Sum_Visitor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Base_Iterator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ContainerUI.rc">

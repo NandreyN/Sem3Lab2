@@ -8,9 +8,8 @@
 
 using namespace std;
 
-
 template<class Type>
-class LDeque: public Base_Deque<Type>
+class LDeque : public Base_Deque<Type>
 {
 	struct Node
 	{
@@ -31,36 +30,24 @@ class LDeque: public Base_Deque<Type>
 		Node* prev;
 	};
 
-	class const_iterator;
+	class DequeInputIterator;
 
-	class NodeGetter
+	class DequeConstIterator : public std::iterator<std::random_access_iterator_tag, Node*>
 	{
+		Node * nd;
+		DequeConstIterator(Node* n) : nd(n) {};
 	public:
-		static Node* getNode(const_iterator& ci) { return ci.nd; };
-	};
+		friend LDeque<Type>;
+		DequeConstIterator(const DequeConstIterator& it) :nd(it.nd) {};
+		bool operator==(const DequeConstIterator& rhs) { return nd == rhs.nd; };
+		bool operator!=(const DequeConstIterator& rhs) { return nd != rhs.nd; };
 
-	class const_iterator
-	{
-		Node* nd;
-		typedef const_iterator  self_type;
-		typedef Type value;
-		typedef const Type& const_reference;
-		typedef Type *pointer;
-		typedef int difference_type;
-		typedef std::forward_iterator_tag const_iterator_category;
-	public:
-		// Constructor init list:
-		const_iterator(Node* p) : nd(p) {}
-		const_iterator(const const_iterator& it):nd(it.nd){}
-		// opeartors overload 
-		self_type operator++() { self_type src = *this; nd = nd->next; return src; };
-		self_type operator++(int) { nd = nd->next; return *this; };
-		self_type operator=(const self_type& it) { nd = it->nd; return *this; }
-		const_reference operator*() { return nd->value; }
-		pointer operator->() { return &nd->value; }
-		bool operator==(const self_type& rhs) { return nd == rhs.nd; };
-		bool operator!=(const self_type& rhs) { return nd != rhs.nd; }
-		friend Node* NodeGetter::getNode(const_iterator&);
+		const Type& operator*() const { return nd->value; };
+		const Type& operator->() const { return nd->value; };
+		DequeConstIterator& operator++() { DequeConstIterator cpy = *this; nd = nd->next; return cpy; }
+		DequeConstIterator& operator++(int) { nd = nd->next; return *this; }
+
+		operator DequeInputIterator () { return DequeInputIterator(nd); };
 	};
 
 public:
@@ -88,8 +75,8 @@ public:
 	bool operator==(const LDeque&) const;//ok
 	bool operator!=(const LDeque&) const;//ok
 
-	const_iterator  begin() const; // ok
-	const_iterator  end() const; // ok
+	DequeConstIterator begin() const; // ok
+	DequeConstIterator end() const; // ok
 	string toString() const; // ok
 
 
@@ -103,7 +90,7 @@ public:
 	void swap(LDeque<Type>&); // ok
 
 	template<class ... Args>
-	const_iterator  emplace(const_iterator  position, Args&& ... args);
+	DequeConstIterator  emplace(DequeConstIterator  position, Args&& ... args);
 
 	void clear();//ok
 	size_t size() const; // ok
@@ -111,11 +98,12 @@ public:
 
 	void accept(Base_Visitor<Type>&) override;
 private:
-	NodeGetter ng;
+
 	Node* _head;
 	Node* _tail;
 	int  _length;
 };
+
 
 template <class Type>
 LDeque<Type>::LDeque() : _length(0)
@@ -251,15 +239,15 @@ bool LDeque<Type>::operator!=(const LDeque& ld) const
 }
 
 template <class Type>
-typename LDeque<Type>::const_iterator  LDeque<Type>::begin() const
+typename LDeque<Type>::DequeConstIterator  LDeque<Type>::begin() const
 {
-	return const_iterator(_head);
+	return DequeConstIterator(_head);
 }
 
 template <class Type>
-typename LDeque<Type>::const_iterator  LDeque<Type>::end() const
+typename LDeque<Type>::DequeConstIterator LDeque<Type>::end() const
 {
-	return const_iterator(_tail);
+	return DequeConstIterator(_tail);
 }
 
 template <class Type>
@@ -366,13 +354,13 @@ void LDeque<Type>::swap(LDeque<Type>& other)
 
 template <class Type>
 template <class ... Args>
-typename LDeque<Type>::const_iterator LDeque<Type>::emplace(const_iterator position, Args&&... args)
+typename LDeque<Type>::DequeConstIterator LDeque<Type>::emplace(DequeConstIterator position, Args&&... args)
 {
 	int sz = sizeof...(args);
 	Type arguments[] = { static_cast<Type>(args)... };
 
 	Node* cpy = _head;
-	Node* got = NodeGetter::getNode(position);
+	Node* got = position.nd;
 	if (got == _tail)
 	{
 		for (auto i = 0; i < sz; i++) push_back(arguments[i]);
@@ -383,8 +371,8 @@ typename LDeque<Type>::const_iterator LDeque<Type>::emplace(const_iterator posit
 		cpy = cpy->next;
 
 
-	Node* targetNode = NodeGetter::getNode(position);
-	Node* toReturn = NodeGetter::getNode(position);
+	Node* targetNode = position.nd;
+	Node* toReturn = position.nd;
 	Node* concatNodeRight = targetNode->next;
 
 	for (auto i = 0; i < sz; i++)
