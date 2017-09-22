@@ -30,12 +30,15 @@ class LDeque : public Base_Deque<Type>
 		Node* prev;
 	};
 
+
+public:
 	class DequeConstIterator : public std::iterator<std::random_access_iterator_tag, Node*>
 	{
 		Node * nd;
 		DequeConstIterator(Node* n) : nd(n) {};
 	public:
 		friend LDeque<Type>;
+		DequeConstIterator() { nd = nullptr; };
 		DequeConstIterator(const DequeConstIterator& it) :nd(it.nd) {};
 		bool operator==(const DequeConstIterator& rhs) { return nd == rhs.nd; };
 		bool operator!=(const DequeConstIterator& rhs) { return nd != rhs.nd; };
@@ -47,7 +50,6 @@ class LDeque : public Base_Deque<Type>
 
 	};
 
-public:
 	LDeque();
 	LDeque(std::initializer_list<Type>); // ok
 	LDeque(LDeque&&); // ok
@@ -99,6 +101,44 @@ private:
 	Node* _head;
 	Node* _tail;
 	int  _length;
+};
+
+template<class T>
+class DIterator
+{
+	LDeque<T>& ld;
+	typename LDeque<T>::DequeConstIterator iter;
+	int _size;
+public:
+	friend LDeque<T>;
+	DIterator(LDeque<T>& ld) :ld(ld), _size(0)
+	{
+		iter = ld.begin();
+	};
+
+	T first()
+	{
+		return *ld.begin();
+	};
+
+	T next()
+	{
+		++_size;
+		if (_size >= ld.size())
+			return NULL;
+		++iter;
+		return *iter;
+	};
+
+	bool isDone()
+	{
+		return _size < ld.size();
+	};
+
+	T currentItem()
+	{
+		return *iter;
+	};
 };
 
 
