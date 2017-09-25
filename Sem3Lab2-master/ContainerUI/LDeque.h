@@ -228,6 +228,7 @@ LDeque<Type>& LDeque<Type>::operator=(LDeque&& ld)
 template <class Type>
 LDeque<Type>& LDeque<Type>::operator=(const LDeque& ld)
 {
+	clear();
 	*this = LDeque(ld);
 	return *this;
 }
