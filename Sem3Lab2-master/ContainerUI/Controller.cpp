@@ -181,7 +181,8 @@ BOOL Controller::dlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			{
 				string inp = getInput(_handle, IDC_INPUTINIT);
 				if (!isStringOK(inp)) break;
-				_modelPtr->deque = LDeque<int>(inp);
+				 LDeque<int> a(inp);
+				 _modelPtr->deque = a;
 				_viewPtr->UIUpdate("DisableWindow", IDC_INPUTINIT, "");
 				_viewPtr->UIUpdate("DisableWindow", IDC_INITBUTTON, "");
 				_viewPtr->UIUpdate("UpdateDequeStateMessage", IDC_CCONTENT, _modelPtr->deque.toString());
