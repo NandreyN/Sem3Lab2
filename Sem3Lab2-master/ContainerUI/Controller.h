@@ -9,8 +9,7 @@ class Controller
 	HWND _handle;
 	std::shared_ptr<View> _viewPtr;
 	std::shared_ptr<Model<int>> _modelPtr;
-	vector<int> parseString(const string& s);
-	bool isStringOK(const string&) const;
+	
 	string getInput(HWND, int) const;
 
 	template<class T>

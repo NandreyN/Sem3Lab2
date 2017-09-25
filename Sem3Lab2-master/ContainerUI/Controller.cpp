@@ -37,33 +37,20 @@ LRESULT CALLBACK DlgCallback(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPar
 	return 0;
 }
 
-vector<int> Controller::parseString(const string& s)
-{
-	vector<int> vect;
-	istringstream oss(s);
-	while (!oss.eof())
-	{
-		int elem;
-		oss >> elem;
-		vect.push_back(elem);
-	}
-	return vect;
-
-}
-
-bool Controller::isStringOK(const string& s) const
-{
-	if (s.empty()) return false;
-	for (char c : s)
-		if (!isdigit(c) && c != ' ') return false;
-	return true;
-}
 
 string Controller::getInput(HWND hwnd, int elementID) const
 {
 	char buffer[1024];
 	GetWindowText(GetDlgItem(hwnd, elementID), buffer, 1024);
 	return string(buffer);
+}
+
+bool isStringOK(const string& s)
+{
+	if (s.empty()) return false;
+	for (char c : s)
+		if (!isdigit(c) && c != ' ') return false;
+	return true;
 }
 
 Controller::Controller(HINSTANCE hinstance, HINSTANCE prevHinstance, LPSTR lpCmdLine, int nCmdShow)
@@ -131,7 +118,7 @@ LRESULT Controller::mainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
 		dlgHWND = CreateDialog(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG1), hwnd, (DLGPROC)DlgCallback);
 		windowMap[dlgHWND] = this;
 		ShowWindow(dlgHWND, SW_SHOW);
-		SendMessage(dlgHWND, WM_INITDIALOG,0,0);
+		SendMessage(dlgHWND, WM_INITDIALOG, 0, 0);
 		break;
 	case WM_CLOSE:
 		DestroyWindow(hwnd);
@@ -153,11 +140,10 @@ BOOL Controller::dlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_INITDIALOG:
 		_handle = hwnd;
 		_viewPtr = std::shared_ptr<View>(new View(_handle));
-		_modelPtr = std::shared_ptr<Model<int>>(new Model<int>());
-		_modelPtr->srcDeque = LDeque<int>{6,7,8};
-		_modelPtr->deque = LDeque<int>{1,2,3,4,5};
-		_viewPtr->UIUpdate("UpdateDequeStateMessage", IDC_CCONTENT, _modelPtr->deque.toString());
-		_viewPtr->UIUpdate("SetWindowText", IDC_TEXT, _modelPtr->srcDeque.toString());
+		_modelPtr = std::shared_ptr<Model<int>>(new Model<int>(LDeque<int>{1, 2, 3, 4, 5}, LDeque<int>{6, 7, 8}));
+
+		_viewPtr->UIUpdate("UpdateDequeStateMessage", IDC_CCONTENT, _modelPtr->firstToString());
+		_viewPtr->UIUpdate("SetWindowText", IDC_TEXT, _modelPtr->secondToString());
 		break;
 	case WM_COMMAND:
 		if (HIWORD(wParam) == EN_SETFOCUS && LOWORD(wParam) == IDC_INPUTINIT)
@@ -177,108 +163,104 @@ BOOL Controller::dlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		switch (LOWORD(wParam))
 		{
-			case IDC_INITBUTTON:
-			{
-				string inp = getInput(_handle, IDC_INPUTINIT);
-				if (!isStringOK(inp)) break;
-				 LDeque<int> a(inp);
-				 _modelPtr->deque = a;
-				_viewPtr->UIUpdate("DisableWindow", IDC_INPUTINIT, "");
-				_viewPtr->UIUpdate("DisableWindow", IDC_INITBUTTON, "");
-				break;
-			}
-
-			case IDC_PUSHF:
-			{
-				string inp = getInput(_handle, IDC_INPUTPUSHFRONT);
-				if (!isStringOK(inp)) break;
-
-				vector<int> data = parseString(inp);
-				for (auto& elem : data)
-					_modelPtr->deque.push_front(elem);
-				break;
-			}
-
-			case IDC_PUSHB:
-			{
-				string inp = getInput(_handle, IDC_INPUTPUSHBACK);
-				if (!isStringOK(inp)) break;
-
-				vector<int> data = parseString(inp);
-				for (auto& elem : data)
-					_modelPtr->deque.push_back(elem);
-				break;
-			}
-			case IDC_POPB:
-			{
-				try
-				{
-					_modelPtr->deque.pop_back();
-				}
-				catch (std::out_of_range ex)
-				{
-					_viewPtr->UIUpdate("SetWindowText", IDC_OUPUT, string(ex.what()));
-				}
-				break;
-			}
-
-			case IDC_POPF:
-			{
-				try
-				{
-					_modelPtr->deque.pop_front();
-				}
-				catch (std::out_of_range ex)
-				{
-					_viewPtr->UIUpdate("SetWindowText", IDC_OUPUT, string(ex.what()));
-				}
-				break;
-			}
-
-			case IDC_CLEARBUTTON:
-			{
-				_modelPtr->deque.clear();
-				break;
-			}
-
-			case IDC_SWAPBUTTON:
-			{
-				_modelPtr->deque.swap(_modelPtr->srcDeque);
-				_viewPtr->UIUpdate("SetWindowText", IDC_TEXT, _modelPtr->srcDeque.toString());
-				break;
-			}
-
-			case IDOK:
-			{
-				SendMessage(GetParent(_handle), WM_CLOSE, 0, 0);
-				EndDialog(_handle, 0);
-				break;
-			}
-
-			case IDC_VISITORSUM:
-			{
-				std::initializer_list<int> ld_init = { 1,2,2,0,7,8,3,5 };
-				std::initializer_list<int> ad_init = { 10,10,12,11 };
-
-				Sum_Visitor<int> v;
-				LDeque<int> ld(ld_init);
-				ADeque<int> ad(ad_init);
-
-				string visitor_text_string = "LDeque init: " + initListToString(ld_init) + " \r\nADeque init: " + initListToString(ad_init) + "\r\n";
-				_viewPtr->UIUpdate("SetWindowText", IDC_VISITORTEXT, visitor_text_string);
-
-				ld.accept(v);
-				int l = v.getSum();
-				ad.accept(v);
-				int a = v.getSum();
-
-				string messageBoxText = "for LDeque : " + to_string(l) + "\r\n" + "for ADeque : " + to_string(a) + "\r\n";
-				_viewPtr->UIUpdate("MessageBox", 0, messageBoxText);
-
-				break;
-			}
+		case IDC_INITBUTTON:
+		{
+			string inp = getInput(_handle, IDC_INPUTINIT);
+			if (!isStringOK(inp)) break;
+			LDeque<int> a(inp);
+			_modelPtr->setFirst(a);
+			_viewPtr->UIUpdate("DisableWindow", IDC_INPUTINIT, "");
+			_viewPtr->UIUpdate("DisableWindow", IDC_INITBUTTON, "");
+			break;
 		}
-		_viewPtr->UIUpdate("UpdateDequeStateMessage", IDC_CCONTENT, _modelPtr->deque.toString());
+
+		case IDC_PUSHF:
+		{
+			string inp = getInput(_handle, IDC_INPUTPUSHFRONT);
+			if (!isStringOK(inp)) break;
+
+			_modelPtr->push_front_string(inp);
+			break;
+		}
+
+		case IDC_PUSHB:
+		{
+			string inp = getInput(_handle, IDC_INPUTPUSHBACK);
+			if (!isStringOK(inp)) break;
+
+			_modelPtr->push_back_string(inp);
+			break;
+		}
+		case IDC_POPB:
+		{
+			try
+			{
+				_modelPtr->pop_back();
+			}
+			catch (std::out_of_range ex)
+			{
+				_viewPtr->UIUpdate("SetWindowText", IDC_OUPUT, string(ex.what()));
+			}
+			break;
+		}
+
+		case IDC_POPF:
+		{
+			try
+			{
+				_modelPtr->pop_front();
+			}
+			catch (std::out_of_range ex)
+			{
+				_viewPtr->UIUpdate("SetWindowText", IDC_OUPUT, string(ex.what()));
+			}
+			break;
+		}
+
+		case IDC_CLEARBUTTON:
+		{
+			_modelPtr->clear();
+			break;
+		}
+
+		case IDC_SWAPBUTTON:
+		{
+			_modelPtr->swapDeques();
+			_viewPtr->UIUpdate("SetWindowText", IDC_TEXT, _modelPtr->secondToString());
+			break;
+		}
+
+		case IDOK:
+		{
+			SendMessage(GetParent(_handle), WM_CLOSE, 0, 0);
+			EndDialog(_handle, 0);
+			break;
+		}
+
+		case IDC_VISITORSUM:
+		{
+			std::initializer_list<int> ld_init = { 1,2,2,0,7,8,3,5 };
+			std::initializer_list<int> ad_init = { 10,10,12,11 };
+
+			Sum_Visitor<int> v;
+			LDeque<int> ld(ld_init);
+			ADeque<int> ad(ad_init);
+
+			string visitor_text_string = "LDeque init: " + initListToString(ld_init) + " \r\nADeque init: " + initListToString(ad_init) + "\r\n";
+			_viewPtr->UIUpdate("SetWindowText", IDC_VISITORTEXT, visitor_text_string);
+
+			ld.accept(v);
+			int l = v.getSum();
+			ad.accept(v);
+			int a = v.getSum();
+
+			string messageBoxText = "for LDeque : " + to_string(l) + "\r\n" + "for ADeque : " + to_string(a) + "\r\n";
+			_viewPtr->UIUpdate("MessageBox", 0, messageBoxText);
+
+			break;
+		}
+		}
+		_viewPtr->UIUpdate("UpdateDequeStateMessage", IDC_CCONTENT, _modelPtr->firstToString());
 		break;
 	}
 
