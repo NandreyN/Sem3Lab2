@@ -185,7 +185,6 @@ BOOL Controller::dlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 				 _modelPtr->deque = a;
 				_viewPtr->UIUpdate("DisableWindow", IDC_INPUTINIT, "");
 				_viewPtr->UIUpdate("DisableWindow", IDC_INITBUTTON, "");
-				_viewPtr->UIUpdate("UpdateDequeStateMessage", IDC_CCONTENT, _modelPtr->deque.toString());
 				break;
 			}
 
@@ -197,8 +196,6 @@ BOOL Controller::dlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 				vector<int> data = parseString(inp);
 				for (auto& elem : data)
 					_modelPtr->deque.push_front(elem);
-
-				_viewPtr->UIUpdate("UpdateDequeStateMessage", IDC_CCONTENT, _modelPtr->deque.toString());
 				break;
 			}
 
@@ -210,8 +207,6 @@ BOOL Controller::dlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 				vector<int> data = parseString(inp);
 				for (auto& elem : data)
 					_modelPtr->deque.push_back(elem);
-
-				_viewPtr->UIUpdate("UpdateDequeStateMessage", IDC_CCONTENT, _modelPtr->deque.toString());
 				break;
 			}
 			case IDC_POPB:
@@ -224,7 +219,6 @@ BOOL Controller::dlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 				{
 					_viewPtr->UIUpdate("SetWindowText", IDC_OUPUT, string(ex.what()));
 				}
-				_viewPtr->UIUpdate("UpdateDequeStateMessage", IDC_CCONTENT, _modelPtr->deque.toString());
 				break;
 			}
 
@@ -238,21 +232,18 @@ BOOL Controller::dlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 				{
 					_viewPtr->UIUpdate("SetWindowText", IDC_OUPUT, string(ex.what()));
 				}
-				_viewPtr->UIUpdate("UpdateDequeStateMessage", IDC_CCONTENT, _modelPtr->deque.toString());
 				break;
 			}
 
 			case IDC_CLEARBUTTON:
 			{
 				_modelPtr->deque.clear();
-				_viewPtr->UIUpdate("UpdateDequeStateMessage", IDC_CCONTENT, _modelPtr->deque.toString());
 				break;
 			}
 
 			case IDC_SWAPBUTTON:
 			{
 				_modelPtr->deque.swap(_modelPtr->srcDeque);
-				_viewPtr->UIUpdate("UpdateDequeStateMessage", IDC_CCONTENT, _modelPtr->deque.toString());
 				_viewPtr->UIUpdate("SetWindowText", IDC_TEXT, _modelPtr->srcDeque.toString());
 				break;
 			}
@@ -287,7 +278,7 @@ BOOL Controller::dlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 				break;
 			}
 		}
-	
+		_viewPtr->UIUpdate("UpdateDequeStateMessage", IDC_CCONTENT, _modelPtr->deque.toString());
 		break;
 	}
 
