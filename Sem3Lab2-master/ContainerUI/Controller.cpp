@@ -204,7 +204,7 @@ BOOL Controller::dlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 			case IDC_PUSHB:
 			{
-				string inp = getInput(_handle, IDC_INPUTPUSHFRONT);
+				string inp = getInput(_handle, IDC_INPUTPUSHBACK);
 				if (!isStringOK(inp)) break;
 
 				vector<int> data = parseString(inp);
