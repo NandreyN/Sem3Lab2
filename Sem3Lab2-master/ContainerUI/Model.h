@@ -12,7 +12,9 @@ public:
 	Model();
 	Model(const LDeque<U>&, const LDeque<U>&);
 	void setFirst(const LDeque<U>&);
+	void setFirst(const string&);
 	void setSecond(const LDeque<U>&);
+	void setSecond(const string&);
 
 	void clear();
 	void push_back_string(const string&);
@@ -32,7 +34,7 @@ vector<U> Model<U>::parseString(const string& s)
 	istringstream oss(s);
 	while (!oss.eof())
 	{
-		int elem;
+		U elem;
 		oss >> elem;
 		vect.push_back(elem);
 	}
@@ -67,6 +69,19 @@ void Model<U>::setFirst(const LDeque<U>& ld)
 {
 	deque = ld;
 }
+
+template<class U>
+inline void Model<U>::setFirst(const string & s)
+{
+	deque = LDeque<U>(s);
+}
+
+template<class U>
+inline void Model<U>::setSecond(const string & s)
+{
+	srcDeque = LDeque<U>(s);
+}
+
 
 template <class U>
 void Model<U>::setSecond(const LDeque<U>& ld)

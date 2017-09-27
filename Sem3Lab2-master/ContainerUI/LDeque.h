@@ -169,25 +169,13 @@ LDeque<Type>::LDeque(std::initializer_list<Type> ilist) : _length(ilist.size())
 template <class Type>
 LDeque<Type>::LDeque(LDeque&& ld)
 {
-	operator=(ld);
+	*this = operator=(ld);
 }
 
 template <class Type>
 LDeque<Type>::LDeque(const LDeque& ld)
 {
-	_head = new Node();
-	Node* headCopy = _head;
-	for (auto it = ld.begin(); it != ld.end(); ++it)
-	{
-		headCopy->value = *it;
-		Node* newHead = new Node();
-		headCopy->next = newHead;
-		newHead->prev = headCopy;
-
-		headCopy = headCopy->next;
-	}
-	_tail = headCopy; // >????
-	_length = ld.size();
+	*this = operator=(ld);
 }
 
 template <class Type>
@@ -218,6 +206,7 @@ LDeque<Type>& LDeque<Type>::operator=(LDeque&& ld)
 {
 	if (*this != ld)
 	{
+		clear();
 		for (auto it = ld.begin(); it != ld.end(); ++it)
 			push_back(*it);
 		ld.clear();
@@ -229,7 +218,19 @@ template <class Type>
 LDeque<Type>& LDeque<Type>::operator=(const LDeque& ld)
 {
 	clear();
-	*this = LDeque(ld);
+	_head = new Node();
+	Node* headCopy = _head;
+	for (auto it = ld.begin(); it != ld.end(); ++it)
+	{
+		headCopy->value = *it;
+		Node* newHead = new Node();
+		headCopy->next = newHead;
+		newHead->prev = headCopy;
+
+		headCopy = headCopy->next;
+	}
+	_tail = headCopy; // >????
+	_length = ld.size();
 	return *this;
 }
 

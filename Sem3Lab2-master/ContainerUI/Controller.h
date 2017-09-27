@@ -14,6 +14,7 @@ class Controller
 
 	template<class T>
 	string initListToString(const std::initializer_list<T>& lst);
+	string trim(const string&);
 public:
 	Controller(HINSTANCE hinstance, HINSTANCE prevHinstance, LPSTR lpCmdLine, int nCmdShow);
 	int run();

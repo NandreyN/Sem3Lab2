@@ -53,6 +53,18 @@ bool isStringOK(const string& s)
 	return true;
 }
 
+string Controller::trim(const string & str)
+{
+	size_t first = str.find_first_not_of(' ');
+	if (string::npos == first)
+	{
+		return str;
+	}
+	size_t last = str.find_last_not_of(' ');
+	return str.substr(first, (last - first + 1));
+
+}
+
 Controller::Controller(HINSTANCE hinstance, HINSTANCE prevHinstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	WNDCLASSEX wndclass;
@@ -167,8 +179,8 @@ BOOL Controller::dlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 			string inp = getInput(_handle, IDC_INPUTINIT);
 			if (!isStringOK(inp)) break;
-			LDeque<int> a(inp);
-			_modelPtr->setFirst(a);
+
+			_modelPtr->setFirst(trim(inp));
 			_viewPtr->UIUpdate("DisableWindow", IDC_INPUTINIT, "");
 			_viewPtr->UIUpdate("DisableWindow", IDC_INITBUTTON, "");
 			break;
