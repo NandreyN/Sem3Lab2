@@ -118,7 +118,8 @@ BOOL View::dlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		_handle = hwnd;
 		_controllerPtr = std::shared_ptr<Controller>(new Controller());
 		ar = _controllerPtr->GetModelState();
-		update(ar);
+		SetWindowText(GetDlgItem(_handle, IDC_CCONTENT), ar.First.data());
+		SetWindowText(GetDlgItem(_handle, IDC_TEXT), ar.Second.data());
 		break;
 	case WM_COMMAND:
 		if (HIWORD(wParam) == EN_SETFOCUS && LOWORD(wParam) == IDC_INPUTINIT)
@@ -141,6 +142,8 @@ BOOL View::dlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case IDC_INITBUTTON:
 		{
 			ar = _controllerPtr->OnInitButtonClick(getInput(_handle, IDC_INPUTINIT));
+			UIUpdate("DisableWindow", IDC_INPUTINIT, "");
+			UIUpdate("DisableWindow", IDC_INITBUTTON, "");
 			break;
 		}
 
