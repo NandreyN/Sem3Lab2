@@ -8,6 +8,9 @@ class ActionResult
 		bool UpdateSecond;
 		string First;
 		string Second;
+		string ErrorMessage;
+		bool Error;
+
 		ActionResult();
-		ActionResult(bool, bool, const string&, const string&);
+		ActionResult(bool, bool, const string&, const string&, bool = false,const string& = "");
 };

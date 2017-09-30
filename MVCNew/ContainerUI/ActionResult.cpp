@@ -6,9 +6,11 @@ ActionResult::ActionResult()
 	UpdateSecond = false;
 	First = "";
 	Second = "";
+	Error = false;
+	ErrorMessage = "";
 }
 
-ActionResult::ActionResult(bool f, bool s, const string& s1, const string& s2)
+ActionResult::ActionResult(bool f, bool s, const string& s1, const string& s2, bool error, const string& errMsg)
 {
 	UpdateFirst = f;
 	UpdateSecond = s;
@@ -18,4 +20,7 @@ ActionResult::ActionResult(bool f, bool s, const string& s1, const string& s2)
 
 	if (UpdateSecond)
 		Second = s2;
+
+	Error = error;
+	ErrorMessage = errMsg;
 }

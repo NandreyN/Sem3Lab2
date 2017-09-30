@@ -100,6 +100,8 @@ inline void View::update(const ActionResult &ar)
 {
 	if (ar.UpdateFirst) UIUpdate("SetWindowText", IDC_CCONTENT, ar.First.data());
 	if (ar.UpdateSecond) UIUpdate("SetWindowText", IDC_TEXT, ar.Second.data());
+
+	if (ar.Error) UIUpdate("SetWindowText", IDC_OUPUT, ar.ErrorMessage.data());
 }
 
 string View::getInput(HWND hwnd, int elementID) const

@@ -30,7 +30,7 @@ Controller::Controller()
 
 ActionResult Controller::GetModelState() const
 {
-	return ActionResult(true,true,_modelPtr->firstToString(),_modelPtr->secondToString());
+	return ActionResult(true, true, _modelPtr->firstToString(), _modelPtr->secondToString());
 }
 
 ActionResult Controller::OnPushBackButtonClick(const string& str)
@@ -42,7 +42,7 @@ ActionResult Controller::OnPushBackButtonClick(const string& str)
 
 ActionResult  Controller::OnPushFrontButtonClick(const string & str)
 {
-	if (!isStringOK(str)) return ActionResult(false,false, "","");
+	if (!isStringOK(str)) return ActionResult(false, false, "", "");
 	_modelPtr->push_front_string(str);
 	return ActionResult(true, false, _modelPtr->firstToString(), "");
 }
@@ -70,7 +70,7 @@ ActionResult Controller::OnPopBackButtonClick()
 	}
 	catch (std::out_of_range ex)
 	{
-		// handle exception here
+		return  ActionResult(true, false, _modelPtr->firstToString(), "", true, "Empty Deque");
 	}
 	return ActionResult(true, false, _modelPtr->firstToString(), "");
 }
@@ -83,7 +83,7 @@ ActionResult Controller::OnPopFrontButtonClick()
 	}
 	catch (std::out_of_range ex)
 	{
-		// handle here
+		return  ActionResult(true, false, _modelPtr->firstToString(), "", true, "Empty Deque");
 	}
 	return ActionResult(true, false, _modelPtr->firstToString(), "");
 }
@@ -91,7 +91,7 @@ ActionResult Controller::OnPopFrontButtonClick()
 ActionResult Controller::OnSwapButtonClick()
 {
 	_modelPtr->swapDeques();
-	return ActionResult(true,true,_modelPtr->firstToString(), _modelPtr->secondToString());
+	return ActionResult(true, true, _modelPtr->firstToString(), _modelPtr->secondToString());
 }
 
 ActionResult Controller::OnVisitorButtonClick()
@@ -112,7 +112,7 @@ ActionResult Controller::OnVisitorButtonClick()
 
 	string messageBoxText = "for LDeque : " + to_string(l) + "\r\n" + "for ADeque : " + to_string(a) + "\r\n";
 
-	return ActionResult(false,false,"","");
+	return ActionResult(false, false, "", "");
 }
 
 
